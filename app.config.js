@@ -2,17 +2,22 @@ const appFlavours = {
   development: {
     name: "CinePlus Dev",
     bundleId: "com.cineplus.development",
-    icon: "./assets/icon-dev.png",
+    icon: "./assets/development.png",
   },
   staging: {
     name: "CinePlus Staging",
     bundleId: "com.cineplus.staging",
-    icon: "./assets/icon-staging.png",
+    icon: "./assets/staging.png",
+  },
+  preprod: {
+    name: "CinePlus Preprod",
+    bundleId: "com.cineplus.preprod",
+    icon: "./assets/preprod.png",
   },
   production: {
     name: "CinePlus",
     bundleId: "com.cineplus.production",
-    icon: "./assets/icon.png",
+    icon: "./assets/production.png",
   },
 };
 
