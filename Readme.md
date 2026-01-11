@@ -1,0 +1,1 @@
+Run this command for testing the eslint errors `npx eslint . --ext .js,.jsx,.ts,.tsx`

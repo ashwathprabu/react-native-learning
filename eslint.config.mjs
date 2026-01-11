@@ -20,6 +20,7 @@ export default defineConfig([
 			"metro.config.js",
 			"babel.config.js",
 			"jest.config.js",
+			"app.config.js",
 		],
 		languageOptions: {
 			globals: globals.node,
