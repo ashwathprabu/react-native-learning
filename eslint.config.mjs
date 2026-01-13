@@ -23,6 +23,7 @@ export default defineConfig([
 			"app.config.js",
 			"package.json",
 			"node_modules/**",
+			"react-native.config.js"
 		],
 		languageOptions: {
 			globals: globals.node,
