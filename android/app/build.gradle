@@ -4,6 +4,17 @@ apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
+project.ext.envConfigFiles = [
+   productiondebug: ".env.production",
+   productionrelease: ".env.production",
+   preproddebug: ".env.preprod",
+   preprodrelease: ".env.preprod",
+   stagingdebug: ".env.staging",
+   stagingrelease: ".env.staging",
+   developmentdebug: ".env.development",
+   developmentrelease: ".env.development"
+]
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -96,7 +107,39 @@ android {
         versionName "1.0"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
+
     }
+
+
+    flavorDimensions "env"
+
+    productFlavors {
+        development {
+            dimension "env"
+            applicationId "com.cineplus.development"
+            resValue "string", "app_name", "CinePlus Dev"
+            resValue "string", "build_config_package", "com.cineplus"
+        }
+        staging {
+            dimension "env"
+            applicationId "com.cineplus.staging"
+            resValue "string", "app_name", "CinePlus Staging"
+            resValue "string", "build_config_package", "com.cineplus"
+        }
+        preprod {
+            dimension "env"
+            applicationId "com.cineplus.preprod"
+            resValue "string", "app_name", "CinePlus Preprod"
+            resValue "string", "build_config_package", "com.cineplus"
+        }
+        production {
+            dimension "env"
+            applicationId "com.cineplus.app"
+            resValue "string", "app_name", "CinePlus"
+            resValue "string", "build_config_package", "com.cineplus"
+        }
+    }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -130,6 +173,7 @@ android {
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
+
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
@@ -180,3 +224,5 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
