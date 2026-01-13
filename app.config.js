@@ -23,6 +23,8 @@ const appFlavours = {
 
 const appFlavourEnvironment = process.env.APP_ENV || "development";
 
+console.log(`[Config] Env: ${appFlavourEnvironment}, Package: ${appFlavours[appFlavourEnvironment].bundleId}`);
+
 export default {
     expo: {
         name: appFlavours[appFlavourEnvironment].name,

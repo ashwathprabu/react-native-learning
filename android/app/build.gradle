@@ -107,6 +107,7 @@ android {
         versionName "1.0"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
+
     }
 
 
@@ -117,21 +118,25 @@ android {
             dimension "env"
             applicationId "com.cineplus.development"
             resValue "string", "app_name", "CinePlus Dev"
+            resValue "string", "build_config_package", "com.cineplus"
         }
         staging {
             dimension "env"
             applicationId "com.cineplus.staging"
             resValue "string", "app_name", "CinePlus Staging"
+            resValue "string", "build_config_package", "com.cineplus"
         }
         preprod {
             dimension "env"
             applicationId "com.cineplus.preprod"
             resValue "string", "app_name", "CinePlus Preprod"
+            resValue "string", "build_config_package", "com.cineplus"
         }
         production {
             dimension "env"
             applicationId "com.cineplus.app"
             resValue "string", "app_name", "CinePlus"
+            resValue "string", "build_config_package", "com.cineplus"
         }
     }
 
@@ -219,3 +224,5 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"

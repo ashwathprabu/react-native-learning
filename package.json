@@ -11,17 +11,18 @@
     "lint:fix": "npx eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write .",
     "clean": "cd android && ./gradlew clean && cd ..",
-    "android:dev": "cross-env APP_ENV=development npx  expo run:android --variant=developmentDebug",
-    "android:staging": "cross-env APP_ENV=staging npx expo run:android --variant=stagingDebug",
-    "android:preprod": "cross-env APP_ENV=preprod npx expo run:android --variant=preprodDebug",
-    "android:prod": "cross-env APP_ENV=production npx expo run:android --variant=productionRelease"
+    "android:dev": "cross-env APP_ENV=development ENVFILE=.env.development npx expo run:android --variant=developmentDebug",
+    "android:staging": "cross-env APP_ENV=staging ENVFILE=.env.staging npx expo run:android --variant=stagingDebug",
+    "android:preprod": "cross-env APP_ENV=preprod ENVFILE=.env.preprod npx expo run:android --variant=preprodDebug",
+    "android:prod": "cross-env APP_ENV=production ENVFILE=.env.production npx expo run:android --variant=productionRelease"
   },
   "dependencies": {
     "dotenv": "^17.2.3",
     "expo": "~54.0.31",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
-    "react-native": "0.81.5"
+    "react-native": "0.81.5",
+    "react-native-config": "^1.6.1"
   },
   "private": true,
   "devDependencies": {
