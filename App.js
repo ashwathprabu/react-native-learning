@@ -1,42 +1,36 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View, StatusBar } from 'react-native';
-import Config from 'react-native-config';
+import { StatusBar } from 'react-native';
 import BootSplash from 'react-native-bootsplash';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { getFontFamily } from './src/utils/fontFamily';
+import RootNavigator from './src/navigation/RootNavigator';
+import { AuthProvider, useAuth } from './src/store/authStore';
 
-export default function App() {
+function AppContent() {
+  const { loading } = useAuth();
+
   useEffect(() => {
-    const init = async () => {
-      // load fonts, auth, config, etc.
-    };
-
-    init().finally(() => {
+    if (!loading) {
       BootSplash.hide({ fade: true });
       console.log('BootSplash hidden');
-    });
-  }, []);
+    }
+  }, [loading]);
 
+  if (loading) {
+    return null; // Keep splash screen visible while loading
+  }
+
+  return <RootNavigator />;
+}
+
+export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>
-        Open up App.js to start working on your app! {Config.APP_ENV}
-      </Text>
-
-      <Text style={{ fontFamily: getFontFamily(true, 'medium') }}>
-        My text in the right font family - Montserrat Medium!
-      </Text>
-
-      <StatusBar barStyle="light-content" />
-    </View>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <StatusBar barStyle="light-content" backgroundColor="#6E3194" />
+        <AppContent />
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#6E3194',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
