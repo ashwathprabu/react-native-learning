@@ -1,46 +1,97 @@
-import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import { View, Text, Button, StyleSheet, TextInput } from 'react-native';
-import { useAuth } from '../../store/authStore';
-
-export default function LoginScreen({ navigation }) {
-    const { login } = useAuth();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-
-    const handleLogin = async () => {
-        // Mock login
-        await login('mock-jwt-token');
-    };
-
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>CinePlus Login</Text>
-            <TextInput
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                style={styles.input}
-            />
-            <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={styles.input}
-            />
-            <Button title="Login" onPress={handleLogin} />
-            <Button title="Register" onPress={() => navigation.navigate('Register')} />
-        </View>
-    );
-}
-
-LoginScreen.propTypes = {
-    navigation: PropTypes.object.isRequired,
-};
+import React from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ImageBackground,
+} from 'react-native';
 
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', padding: 20 },
-    title: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
-    input: { borderBottomWidth: 1, marginBottom: 15, padding: 10 },
+  background: {
+    flex: 1,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  logo: {
+    color: '#E50914',
+    fontSize: 36,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    marginBottom: 40,
+  },
+  input: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    color: '#fff',
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  button: {
+    backgroundColor: '#E50914',
+    paddingVertical: 16,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  footerText: {
+    color: '#ccc',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  link: {
+    color: '#fff',
+    fontWeight: '600',
+  },
 });
+
+export default function LoginScreen() {
+  return (
+    <ImageBackground
+      source={require('../../assets/images/login-bg.jpg')}
+      style={styles.background}
+    >
+      {/* Dark overlay */}
+      <View style={styles.overlay} />
+
+      {/* Content */}
+      <View style={styles.container}>
+        <Text style={styles.logo}>CINEPLUS</Text>
+
+        <TextInput
+          placeholder="Email"
+          placeholderTextColor="#ccc"
+          style={styles.input}
+        />
+
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#ccc"
+          secureTextEntry
+          style={styles.input}
+        />
+
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>SIGN IN</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.footerText}>
+          Don’t have an account? <Text style={styles.link}>Sign Up</Text>
+        </Text>
+      </View>
+    </ImageBackground>
+  );
+}

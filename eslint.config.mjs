@@ -8,7 +8,12 @@ export default defineConfig([
 		files: ["**/*.{js,mjs,cjs,jsx}"],
 		plugins: { js },
 		extends: ["js/recommended"],
-		languageOptions: { globals: globals.browser },
+		languageOptions: {
+			globals: {
+				...globals.browser,
+				...globals.node,
+			},
+		},
 		settings: {
 			react: {
 				version: "detect",
@@ -21,7 +26,7 @@ export default defineConfig([
 			"babel.config.js",
 			"jest.config.js",
 			"app.config.js",
-			"package.json",
+
 			"node_modules/**",
 			"react-native.config.js"
 		],
