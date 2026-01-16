@@ -1,9 +1,35 @@
-import { Amplify } from 'aws-amplify';
+// src/api/auth/cognito.js
+import { signUp as amplifySignUp } from 'aws-amplify/auth';
 
-Amplify.configure({
-  Auth: {
-    region: 'YOUR_REGION',
-    userPoolId: 'YOUR_POOL_ID',
-    userPoolWebClientId: 'YOUR_CLIENT_ID',
-  },
-});
+export async function signUp({ firstName, lastName, email, phone, password }) {
+  try {
+    // Basic phone number formatting to ensure E.164 compliance if not already present
+    // This assumes the user inputs a number that just needs a country code or is plain digits
+    // Ideally, UI should handle this
+    const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+
+    const { isSignUpComplete, userId, nextStep } = await amplifySignUp({
+      username: email,
+      password,
+      options: {
+        userAttributes: {
+          given_name: firstName,
+          family_name: lastName,
+          email,
+          phone_number: formattedPhone, // Must be in E.164 format
+        },
+        autoSignIn: false, // optional
+      },
+    });
+
+    return { success: true, data: { isSignUpComplete, userId, nextStep } };
+  } catch (error) {
+    let message = error.message || 'Something went wrong';
+    if (error.name === 'UsernameExistsException') message = 'Email already exists';
+    if (error.name === 'InvalidPasswordException') message = 'Password does not meet requirements';
+    if (error.name === 'InvalidParameterException') message = 'Invalid input parameters';
+
+    console.log('SignUp Error:', error);
+    return { success: false, error: message };
+  }
+}

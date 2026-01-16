@@ -1,4 +1,5 @@
 import { registerRootComponent } from 'expo';
+import './src/config/cognito';
 
 import App from './App';
 
