@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
+import OtpVerificationScreen from '../screens/auth/OtpVerificationScreen';
+import OtpScreen from '../screens/auth/OtpScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -11,6 +13,8 @@ export default function AuthNavigator() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="OtpVerification" component={OtpScreen} />
+            <Stack.Screen name="OtpSuccess" component={OtpVerificationScreen} />
         </Stack.Navigator>
     );
 }

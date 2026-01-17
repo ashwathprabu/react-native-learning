@@ -1,5 +1,5 @@
 // src/api/auth/cognito.js
-import { signUp as amplifySignUp } from 'aws-amplify/auth';
+import { signUp as amplifySignUp, signIn as amplifySignIn, getCurrentUser as amplifyGetCurrentUser } from 'aws-amplify/auth';
 
 export async function signUp({ firstName, lastName, email, phone, password }) {
   try {
@@ -31,5 +31,28 @@ export async function signUp({ firstName, lastName, email, phone, password }) {
 
     console.log('SignUp Error:', error);
     return { success: false, error: message };
+  }
+}
+
+export async function signIn({ email, password }) {
+  try {
+    const { isSignedIn, nextStep } = await amplifySignIn({ username: email, password });
+    return { success: true, data: { isSignedIn, nextStep } };
+  } catch (error) {
+    let message = error.message || 'Something went wrong';
+    if (error.name === 'UserNotConfirmedException') message = 'User is not confirmed';
+    if (error.name === 'NotAuthorizedException') message = 'Incorrect username or password';
+
+    console.log('SignIn Error:', error);
+    return { success: false, error: message };
+  }
+}
+
+export async function getCurrentUser() {
+  try {
+    const user = await amplifyGetCurrentUser();
+    return { success: true, data: user };
+  } catch (error) {
+    return { success: false, error: error.message };
   }
 }
