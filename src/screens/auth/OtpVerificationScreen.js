@@ -29,7 +29,7 @@ export default function OtpSuccessScreen({ navigation }) {
           onPress={() => navigation.replace('Login')}
         >
           <Text style={styles.primaryButtonText}>
-            EXPLORE HOME PAGE
+            Next
           </Text>
         </TouchableOpacity>
       </View>

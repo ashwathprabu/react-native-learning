@@ -7,36 +7,59 @@ import {
     StyleSheet,
     ImageBackground,
     Alert,
+    ActivityIndicator,
 } from 'react-native';
 import PropTypes from 'prop-types';
-import { Auth } from 'aws-amplify';
+import { confirmSignUp, resendSignUpCode } from 'aws-amplify/auth';
 
 const OTP_LENGTH = 6;
 
 export default function OtpScreen({ route, navigation }) {
     const { email } = route.params;
     const [code, setCode] = useState('');
+    const [loading, setLoading] = useState(false);
     const inputRef = useRef(null);
 
     const handleVerify = async () => {
         if (code.length !== OTP_LENGTH) {
-            return Alert.alert('Error', 'Please enter the 6-digit code');
+            return Alert.alert('Error', `Please enter the ${OTP_LENGTH}-digit code`);
         }
 
+        setLoading(true);
+
         try {
-            await Auth.confirmSignUp(email, code);
-            navigation.replace('OtpSuccess');
+            // v6 uses a single object with named properties
+            const { isSignUpComplete, nextStep } = await confirmSignUp({
+                username: email,          // The identifier used during sign-up
+                confirmationCode: code    // Use 'confirmationCode', not 'code'
+            });
+
+            // Optionally check if sign up is fully complete
+            if (isSignUpComplete) {
+                navigation.replace('OtpSuccess');
+            } else {
+                console.log('Next step required:', nextStep);
+            }
         } catch (error) {
-            Alert.alert('Verification Failed', error.message);
+            // Error handling remains similar, but check for specific Cognito error names if needed
+            Alert.alert('Verification Failed', error.message || 'An unknown error occurred');
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleResend = async () => {
         try {
-            await Auth.resendSignUp(email);
+            // v6 uses named parameters in a single object
+            const deliveryDetails = await resendSignUpCode({
+                username: email
+            });
+
+            // Optionally use deliveryDetails to show where the code was sent
             Alert.alert('Success', 'Verification code resent');
+            console.log('Code sent to:', deliveryDetails.destination);
         } catch (error) {
-            Alert.alert('Error', error.message);
+            Alert.alert('Error', error.message || 'Failed to resend code');
         }
     };
 
@@ -73,32 +96,36 @@ export default function OtpScreen({ route, navigation }) {
                     <Text>Enter the code sent to </Text>
                     <Text style={styles.email}>{email}</Text>
                 </Text>
-                {/* Hidden Input */}
-                <TextInput
-                    ref={inputRef}
-                    value={code}
-                    onChangeText={text => {
-                        if (/^\d*$/.test(text)) {
-                            setCode(text.slice(0, OTP_LENGTH));
-                        }
-                    }}
-                    keyboardType="number-pad"
-                    maxLength={OTP_LENGTH}
-                    style={styles.hiddenInput}
-                    autoFocus
-                />
 
-                {/* OTP Boxes */}
-                <TouchableOpacity
-                    activeOpacity={1}
-                    onPress={() => inputRef.current.focus()}
-                    style={styles.otpContainer}
-                >
+                {/* OTP Input with Visual Boxes */}
+                <View style={styles.otpContainer}>
                     {renderOtpBoxes()}
-                </TouchableOpacity>
+                    <TextInput
+                        ref={inputRef}
+                        value={code}
+                        onChangeText={text => {
+                            if (/^\d*$/.test(text)) {
+                                setCode(text.slice(0, OTP_LENGTH));
+                            }
+                        }}
+                        keyboardType="number-pad"
+                        maxLength={OTP_LENGTH}
+                        style={styles.otpInput}
+                        autoFocus
+                        caretHidden
+                    />
+                </View>
 
-                <TouchableOpacity style={styles.primaryButton} onPress={handleVerify}>
-                    <Text style={styles.primaryButtonText}>VERIFY</Text>
+                <TouchableOpacity
+                    style={styles.primaryButton}
+                    onPress={handleVerify}
+                    disabled={loading}
+                >
+                    {loading ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text style={styles.primaryButtonText}>VERIFY</Text>
+                    )}
                 </TouchableOpacity>
 
                 <Text style={styles.resendText}>
@@ -161,8 +188,10 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
 
-    hiddenInput: {
+    otpInput: {
         position: 'absolute',
+        width: '100%',
+        height: '100%',
         opacity: 0,
     },
 

@@ -1,5 +1,11 @@
 // src/api/auth/cognito.js
-import { signUp as amplifySignUp, signIn as amplifySignIn, getCurrentUser as amplifyGetCurrentUser } from 'aws-amplify/auth';
+import {
+  signUp as amplifySignUp,
+  signIn as amplifySignIn,
+  getCurrentUser as amplifyGetCurrentUser,
+  signOut as amplifySignOut,
+  fetchUserAttributes as amplifyFetchUserAttributes,
+} from 'aws-amplify/auth';
 
 export async function signUp({ firstName, lastName, email, phone, password }) {
   try {
@@ -17,6 +23,7 @@ export async function signUp({ firstName, lastName, email, phone, password }) {
           family_name: lastName,
           email,
           phone_number: formattedPhone, // Must be in E.164 format
+          'custom:is_onboarded': 'false'
         },
         autoSignIn: false, // optional
       },
@@ -51,6 +58,25 @@ export async function signIn({ email, password }) {
 export async function getCurrentUser() {
   try {
     const user = await amplifyGetCurrentUser();
+    return { success: true, data: user };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function signOut() {
+  try {
+    await amplifySignOut();
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function fetcUserDetails() {
+  try {
+    const user = await amplifyFetchUserAttributes();
+    console.log('user', JSON.stringify(user, null, 2));
     return { success: true, data: user };
   } catch (error) {
     return { success: false, error: error.message };

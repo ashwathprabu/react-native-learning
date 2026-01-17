@@ -11,7 +11,7 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import PropTypes from 'prop-types';
-import { signIn, getCurrentUser } from '../../api/auth/cognito';
+import { signIn, getCurrentUser, signOut, fetcUserDetails } from '../../api/auth/cognito';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const styles = StyleSheet.create({
@@ -141,20 +141,30 @@ export default function LoginScreen({ navigation }) {
             Alert.alert('Error', 'Please enter both email and password');
             return;
         }
-
+        await signOut();
         setLoading(true);
+       
         const response = await signIn({ email, password });
-        console.log('response', response);
         setLoading(false);
-
+        
         if (response.success) {
+            console.log('response', response);
             // Check if user needs to confirm their account
             if (!response.data.isSignedIn && response.data.nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
                 navigation.navigate('OtpVerification', { email });
                 return;
             }
-
-            navigation.navigate('Main');
+            
+            if (response.data.isSignedIn && response.data.nextStep?.signInStep === 'DONE') {
+                const { data } = await fetcUserDetails()
+                if (data['custom:is_onboarded'] === 'false') {
+                    navigation.navigate('Onboarding');
+                    return;
+                }
+                navigation.navigate('Home');
+                return;
+            }
+            Alert.alert('Login Failed', 'Invalid credentials');
         } else {
             Alert.alert('Login Failed', response.error);
         }
