@@ -1,20 +1,57 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import PropTypes from 'prop-types';
-import { useAuth } from '../../store/authStore';
+import CineHeader from './Header';
+import FeaturedCarousel from './FeaturedCarousel';
+import FloatingTabBar from './FloatingTabBar';
 
 export default function HomeScreen({ navigation }) {
-    const { logout } = useAuth();
+    // Mock state for FloatingTabBar since it's integrated directly
+    const mockState = {
+        index: 0,
+        routes: [
+            { key: 'Home-1', name: 'Home' },
+            { key: 'Chat-1', name: 'Chat' },
+            { key: 'WatchList-1', name: 'WatchList' },
+        ],
+    };
+
+    const mockDescriptors = {
+        'Home-1': { options: { title: 'Home' } },
+        'Chat-1': { options: { title: 'Chat' } },
+        'WatchList-1': { options: { title: 'WatchList' } },
+    };
+
+    const mockNavigation = {
+        navigate: (name) => navigation.navigate(name),
+        emit: () => ({ defaultPrevented: false }),
+    };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Welcome to CinePlus</Text>
-            <Button title="My Profile" onPress={() => navigation.navigate('Profile')} />
-            <Button title="Go to Chat" onPress={() => navigation.navigate('Chat')} />
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
+            <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
+            <CineHeader navigation={navigation} />
 
-            <Button title="Support" onPress={() => navigation.navigate('Support')} />
-            <Button title="Logout" onPress={logout} color="red" />
-        </View>
+            <ScrollView
+                style={styles.container}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+            >
+                <FeaturedCarousel />
+
+                {/* Additional sections can be added here */}
+                <View style={styles.content}>
+                    {/* Welcome message or other content */}
+                </View>
+            </ScrollView>
+
+            <FloatingTabBar
+                state={mockState}
+                descriptors={mockDescriptors}
+                navigation={mockNavigation}
+            />
+        </SafeAreaView>
     );
 }
 
@@ -23,6 +60,17 @@ HomeScreen.propTypes = {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', alignItems: 'center', gap: 10 },
-    title: { fontSize: 24, marginBottom: 20 },
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#1a1818ff',
+    },
+    container: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingBottom: 100, // Space for floating tab bar
+    },
+    content: {
+        padding: 20,
+    },
 });

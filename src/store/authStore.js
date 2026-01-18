@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AuthContext = createContext();
@@ -8,10 +9,22 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    AsyncStorage.getItem('token').then(storedToken => {
-      setToken(storedToken);
-      setLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem('token');
+        if (storedToken) {
+          setToken(storedToken);
+        } else {
+          // You might also want to check getCurrentUser() from cognito here as a fallback
+          // but for now we'll stick to the token mechanism or set it if user is found.
+        }
+      } catch (e) {
+        console.error('Failed to load token', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    initializeAuth();
   }, []);
 
   const login = async (newToken) => {
@@ -32,5 +45,9 @@ export function AuthProvider({ children }) {
     </AuthContext.Provider>
   );
 }
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export const useAuth = () => useContext(AuthContext);

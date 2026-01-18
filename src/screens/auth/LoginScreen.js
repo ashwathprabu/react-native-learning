@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { signIn, getCurrentUser, signOut, fetcUserDetails } from '../../api/auth/cognito';
+import { useAuth } from '../../store/authStore';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const styles = StyleSheet.create({
@@ -123,6 +124,7 @@ export default function LoginScreen({ navigation }) {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const { login } = useAuth();
 
 
     useEffect(() => {
@@ -132,7 +134,7 @@ export default function LoginScreen({ navigation }) {
     const checkUser = async () => {
         const { success } = await getCurrentUser();
         if (success) {
-            navigation.navigate('Main');
+            login('authorized');
         }
     };
 
@@ -143,10 +145,10 @@ export default function LoginScreen({ navigation }) {
         }
         await signOut();
         setLoading(true);
-       
+
         const response = await signIn({ email, password });
         setLoading(false);
-        
+
         if (response.success) {
             console.log('response', response);
             // Check if user needs to confirm their account
@@ -154,14 +156,14 @@ export default function LoginScreen({ navigation }) {
                 navigation.navigate('OtpVerification', { email });
                 return;
             }
-            
+
             if (response.data.isSignedIn && response.data.nextStep?.signInStep === 'DONE') {
                 const { data } = await fetcUserDetails()
                 if (data['custom:is_onboarded'] === 'false') {
                     navigation.navigate('Onboarding');
                     return;
                 }
-                navigation.navigate('Home');
+                login('authorized');
                 return;
             }
             Alert.alert('Login Failed', 'Invalid credentials');

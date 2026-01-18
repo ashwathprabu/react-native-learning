@@ -7,10 +7,11 @@ import {
     TouchableOpacity,
     StatusBar,
 } from 'react-native';
-import PropTypes from 'prop-types';
-import LinearGradient from 'react-native-linear-gradient';
+// import LinearGradient from 'react-native-linear-gradient';
+import { useAuth } from '../../store/authStore';
 
-const OnboardingScreen = ({ navigation }) => {
+const OnboardingScreen = () => {
+    const { login } = useAuth();
     return (
         <View style={styles.container}>
             <StatusBar translucent backgroundColor="transparent" />
@@ -22,10 +23,11 @@ const OnboardingScreen = ({ navigation }) => {
                 resizeMode="cover"
             >
                 {/* Bottom Fade */}
-                <LinearGradient
+                {/* <LinearGradient
                     colors={['transparent', 'rgba(0,0,0,2)', '#000']}
                     style={styles.gradient}
-                >
+                > */}
+                <View style={styles.gradient}>
                     <Text style={styles.title}>
                         Unlimited moviesd, TV shows & more
                     </Text>
@@ -36,11 +38,12 @@ const OnboardingScreen = ({ navigation }) => {
 
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={() => navigation.navigate('Login')}
+                        onPress={() => login('authorized')}
                     >
                         <Text style={styles.buttonText}>GET STARTED</Text>
                     </TouchableOpacity>
-                </LinearGradient>
+                    {/* </LinearGradient> */}
+                </View>
             </ImageBackground>
         </View>
     );
@@ -90,11 +93,5 @@ const styles = StyleSheet.create({
         letterSpacing: 0.8,
     },
 });
-
-OnboardingScreen.propTypes = {
-    navigation: PropTypes.shape({
-        navigate: PropTypes.func.isRequired,
-    }).isRequired,
-};
 
 export default OnboardingScreen;
