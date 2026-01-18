@@ -1,21 +1,26 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, StatusBar } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PropTypes from 'prop-types';
 import CineHeader from './Header';
-import FeaturedCarousel from './FeaturedCarousel';
 import FloatingTabBar from './FloatingTabBar';
+import HomeContent from './HomeContent';
+import WatchListContent from './WatchListContent';
+import ProfileContent from './ProfileContent';
 
 export default function HomeScreen({ navigation }) {
-    // Mock state for FloatingTabBar since it's integrated directly
+    const [activeIndex, setActiveIndex] = useState(0);
+
+    const routes = [
+        { key: 'Home-1', name: 'Home' },
+        { key: 'Chat-1', name: 'Chat' },
+        { key: 'WatchList-1', name: 'WatchList' },
+        { key: 'Profile-1', name: 'Profile' },
+    ];
+
     const mockState = {
-        index: 0,
-        routes: [
-            { key: 'Home-1', name: 'Home' },
-            { key: 'Chat-1', name: 'Chat' },
-            { key: 'WatchList-1', name: 'WatchList' },
-            { key: 'Profile-1', name: 'Profile' },
-        ],
+        index: activeIndex,
+        routes: routes,
     };
 
     const mockDescriptors = {
@@ -26,27 +31,32 @@ export default function HomeScreen({ navigation }) {
     };
 
     const mockNavigation = {
-        navigate: (name) => navigation.navigate(name),
+        navigate: (name) => {
+            if (name === 'Chat') {
+                navigation.navigate('Chat');
+            } else {
+                const index = routes.findIndex(r => r.name === name);
+                if (index !== -1) setActiveIndex(index);
+            }
+        },
         emit: () => ({ defaultPrevented: false }),
+    };
+
+    const renderContent = () => {
+        switch (activeIndex) {
+            case 0: return <HomeContent />;
+            case 2: return <WatchListContent />;
+            case 3: return <ProfileContent />;
+            default: return <HomeContent />;
+        }
     };
 
     return (
         <SafeAreaView style={styles.safeArea} edges={['top']}>
             <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
-            <CineHeader navigation={navigation} />
+            <CineHeader />
 
-            <ScrollView
-                style={styles.container}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-            >
-                <FeaturedCarousel />
-
-                {/* Additional sections can be added here */}
-                <View style={styles.content}>
-                    {/* Welcome message or other content */}
-                </View>
-            </ScrollView>
+            {renderContent()}
 
             <FloatingTabBar
                 state={mockState}
@@ -65,14 +75,5 @@ const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: '#1a1818ff',
-    },
-    container: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingBottom: 100, // Space for floating tab bar
-    },
-    content: {
-        padding: 20,
     },
 });
