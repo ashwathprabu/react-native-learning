@@ -74,6 +74,11 @@ const FloatingTabBar = ({ state, descriptors, navigation }) => {
                             type: 'md',
                             name: isFocused ? 'movie-open-plus' : 'movie-open-plus-outline',
                         };
+                    } else if (route.name === 'Profile') {
+                        icon = {
+                            type: 'fa',
+                            name: isFocused ? 'user' : 'user-o',
+                        };
                     } else {
                         icon = { type: 'ion', name: 'ellipse-outline' }; // Default icon
                     }
@@ -129,7 +134,7 @@ const styles = StyleSheet.create({
 
         // Shadow for Android
         elevation: 5,
-        width: '50%',
+        width: '55%',
         justifyContent: 'space-around',
         alignItems: 'center',
     },

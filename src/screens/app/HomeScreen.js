@@ -14,6 +14,7 @@ export default function HomeScreen({ navigation }) {
             { key: 'Home-1', name: 'Home' },
             { key: 'Chat-1', name: 'Chat' },
             { key: 'WatchList-1', name: 'WatchList' },
+            { key: 'Profile-1', name: 'Profile' },
         ],
     };
 
@@ -21,6 +22,7 @@ export default function HomeScreen({ navigation }) {
         'Home-1': { options: { title: 'Home' } },
         'Chat-1': { options: { title: 'Chat' } },
         'WatchList-1': { options: { title: 'WatchList' } },
+        'Profile-1': { options: { title: 'Profile' } },
     };
 
     const mockNavigation = {
