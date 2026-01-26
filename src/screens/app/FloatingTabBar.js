@@ -6,6 +6,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
+import { useTheme } from '../../theme/ThemeContext';
+
 const IconMap = {
     material: MaterialCommunityIcons,
     ion: Ionicons,
@@ -29,14 +31,17 @@ DynamicIcon.propTypes = {
 
 const FloatingTabBar = ({ state, descriptors, navigation }) => {
     const insets = useSafeAreaInsets();
+    const { theme, isDarkMode } = useTheme();
 
     return (
-        <View style={[styles.container, { paddingBottom: insets.bottom }]}>
-            <View style={styles.tabBar}>
+        <View style={[styles.container, { paddingBottom: insets.bottom, backgroundColor: 'transparent' }]}>
+            <View style={[styles.tabBar, { backgroundColor: theme.surface, shadowColor: isDarkMode ? '#000' : '#444' }]}>
                 {state.routes.map((route, index) => {
                     const { options } = descriptors[route.key];
 
                     const isFocused = state.index === index;
+                    const activeColor = theme.accent;
+                    const inactiveColor = theme.primary;
 
                     const onPress = () => {
                         const event = navigation.emit({
@@ -98,7 +103,7 @@ const FloatingTabBar = ({ state, descriptors, navigation }) => {
                                 type={icon.type}
                                 name={icon.name}
                                 size={27}
-                                color="#9c0909ff"
+                                color={isFocused ? activeColor : inactiveColor}
                             />
                         </TouchableOpacity>
                     );
@@ -120,21 +125,20 @@ const styles = StyleSheet.create({
     },
     tabBar: {
         flexDirection: 'row',
-        backgroundColor: '#0a0303ff',
         marginHorizontal: 20,
         marginBottom: 20, // Distance from bottom
         paddingVertical: 15,
         borderRadius: 35, // High radius for "Floating Capsule" look
 
         // Shadow for iOS
-        shadowColor: '#000',
+        shadowColor: '#242121ff',
         shadowOffset: { width: 0, height: 5 },
         shadowOpacity: 0.1,
         shadowRadius: 10,
 
         // Shadow for Android
         elevation: 5,
-        width: '55%',
+        width: '35%',
         justifyContent: 'space-around',
         alignItems: 'center',
     },

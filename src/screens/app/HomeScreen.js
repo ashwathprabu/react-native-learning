@@ -1,33 +1,41 @@
 import React, { useState } from 'react';
-import { StyleSheet, StatusBar } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PropTypes from 'prop-types';
+import { useAuth } from '../../store/authStore';
+import { useTheme } from '../../theme/ThemeContext';
 import CineHeader from './Header';
 import FloatingTabBar from './FloatingTabBar';
 import HomeContent from './HomeContent';
 import WatchListContent from './WatchListContent';
-import ProfileContent from './ProfileContent';
 
 export default function HomeScreen({ navigation }) {
+    const { userData } = useAuth();
+    const { theme } = useTheme();
     const [activeIndex, setActiveIndex] = useState(0);
+
+    const getInitials = () => {
+        if (!userData) return '';
+        const first = userData.given_name ? userData.given_name[0] : '';
+        const last = userData.family_name ? userData.family_name[0] : '';
+        return (first + last).toUpperCase();
+    };
+
+    const initials = getInitials();
 
     const routes = [
         { key: 'Home-1', name: 'Home' },
-        { key: 'Chat-1', name: 'Chat' },
         { key: 'WatchList-1', name: 'WatchList' },
-        { key: 'Profile-1', name: 'Profile' },
     ];
 
     const mockState = {
         index: activeIndex,
-        routes: routes,
+        routes: routes.filter(r => r.name !== 'Chat'),
     };
 
     const mockDescriptors = {
         'Home-1': { options: { title: 'Home' } },
-        'Chat-1': { options: { title: 'Chat' } },
         'WatchList-1': { options: { title: 'WatchList' } },
-        'Profile-1': { options: { title: 'Profile' } },
     };
 
     const mockNavigation = {
@@ -45,16 +53,17 @@ export default function HomeScreen({ navigation }) {
     const renderContent = () => {
         switch (activeIndex) {
             case 0: return <HomeContent />;
-            case 2: return <WatchListContent />;
-            case 3: return <ProfileContent />;
+            case 1: return <WatchListContent />;
             default: return <HomeContent />;
         }
     };
 
     return (
-        <SafeAreaView style={styles.safeArea} edges={['top']}>
-            <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
-            <CineHeader />
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['top']}>
+            <CineHeader
+                onProfilePress={() => navigation.navigate('Profile')}
+                initials={initials}
+            />
 
             {renderContent()}
 
@@ -74,6 +83,5 @@ HomeScreen.propTypes = {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#1a1818ff',
     },
 });

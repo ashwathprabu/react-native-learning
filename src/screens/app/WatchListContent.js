@@ -1,15 +1,18 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, Text } from 'react-native';
+import { useTheme } from '../../theme/ThemeContext';
 
 export default function WatchListContent() {
+    const { theme } = useTheme();
+
     return (
         <ScrollView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: theme.background }]}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
         >
             <View style={styles.content}>
-                <Text style={styles.title}>Your Watchlist</Text>
+                <Text style={[styles.title, { color: theme.text }]}>Your Watchlist</Text>
                 {/* Watchlist items */}
             </View>
         </ScrollView>
@@ -29,7 +32,6 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 24,
-        color: '#fff',
         marginBottom: 20,
     },
 });

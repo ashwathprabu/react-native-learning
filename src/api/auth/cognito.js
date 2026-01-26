@@ -73,7 +73,7 @@ export async function signOut() {
   }
 }
 
-export async function fetcUserDetails() {
+export async function fetchUserDetails() {
   try {
     const user = await amplifyFetchUserAttributes();
     console.log('user', JSON.stringify(user, null, 2));

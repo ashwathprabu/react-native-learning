@@ -5,9 +5,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import RootNavigator from './src/navigation/RootNavigator';
 import { AuthProvider, useAuth } from './src/store/authStore';
+import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 
 function AppContent() {
   const { loading } = useAuth();
+  const { theme, isDarkMode } = useTheme();
 
   useEffect(() => {
     if (!loading) {
@@ -20,16 +22,25 @@ function AppContent() {
     return null; // Keep splash screen visible while loading
   }
 
-  return <RootNavigator />;
+  return (
+    <>
+      <StatusBar
+        barStyle={isDarkMode ? "light-content" : "dark-content"}
+        backgroundColor={theme.background}
+      />
+      <RootNavigator />
+    </>
+  );
 }
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <StatusBar barStyle="light-content" backgroundColor="#6E3194" />
-        <AppContent />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
