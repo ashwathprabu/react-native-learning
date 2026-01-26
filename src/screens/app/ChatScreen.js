@@ -17,39 +17,70 @@ export default function ChatScreen() {
     const { theme } = useTheme();
     const insets = useSafeAreaInsets();
     const [inputText, setInputText] = useState('');
+    const [isChatEnabled, setIsChatEnabled] = useState(false);
+    const [quickReplies, setQuickReplies] = useState([
+        { id: 'sub', text: 'Subscription Issue' },
+        { id: 'play', text: 'Playback Issue' },
+        { id: 'other', text: 'Other' },
+    ]);
+
     const [messages, setMessages] = useState([
         {
             id: '1',
-            text: 'Hello! How can we help you today?',
+            text: 'Hello! How can we help you today? Please choose an option below.',
             sender: 'Cineplus Support',
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
     ]);
     const flatListRef = useRef();
 
-    const handleSend = () => {
-        if (inputText.trim().length === 0) return;
-
+    const addMessage = (text, sender) => {
         const newMessage = {
             id: Date.now().toString(),
-            text: inputText.trim(),
-            sender: 'You',
+            text,
+            sender,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
+        setMessages(prev => [...prev, newMessage]);
+    };
 
-        setMessages(prevMessages => [...prevMessages, newMessage]);
-        setInputText('');
+    const handleQuickReply = (reply) => {
+        setQuickReplies([]); // Clear replies after selection
+        addMessage(reply.text, 'You');
 
-        // Simulate Support Response
         setTimeout(() => {
-            const supportResponse = {
-                id: (Date.now() + 1).toString(),
-                text: "Thanks for reaching out! Our team will get back to you shortly.",
-                sender: 'Cineplus Support',
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            };
-            setMessages(prevMessages => [...prevMessages, supportResponse]);
-        }, 1500);
+            addMessage("Our team will reach out to you shortly.", 'Cineplus Support');
+
+            setTimeout(() => {
+                addMessage("Are you still facing the issue?", 'Cineplus Support');
+                setQuickReplies([
+                    { id: 'yes', text: 'Yes' },
+                    { id: 'no', text: 'No' },
+                ]);
+            }, 1000);
+        }, 800);
+    };
+
+    const handleYesNo = (reply) => {
+        setQuickReplies([]);
+        addMessage(reply.text, 'You');
+
+        if (reply.id === 'yes') {
+            setIsChatEnabled(true);
+            setTimeout(() => {
+                addMessage("Chat enabled. You can now type your message below.", 'Cineplus Support');
+            }, 500);
+        } else {
+            setTimeout(() => {
+                addMessage("Great! We are glad to help. If you need anything else, just let us know.", 'Cineplus Support');
+            }, 500);
+        }
+    };
+
+    const handleSend = () => {
+        if (inputText.trim().length === 0 || !isChatEnabled) return;
+        addMessage(inputText.trim(), 'You');
+        setInputText('');
     };
 
     const renderMessage = ({ item }) => {
@@ -103,12 +134,33 @@ export default function ChatScreen() {
                     onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
                 />
 
+                {quickReplies.length > 0 && (
+                    <View style={styles.quickReplyContainer}>
+                        {quickReplies.map(reply => (
+                            <TouchableOpacity
+                                key={reply.id}
+                                style={[styles.quickReplyButton, { backgroundColor: theme.surface, borderColor: theme.primary }]}
+                                onPress={() => {
+                                    if (reply.id === 'yes' || reply.id === 'no') {
+                                        handleYesNo(reply);
+                                    } else {
+                                        handleQuickReply(reply);
+                                    }
+                                }}
+                            >
+                                <Text style={[styles.quickReplyText, { color: theme.text }]}>{reply.text}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                )}
+
                 <View style={[
                     styles.inputContainer,
                     {
                         borderTopColor: theme.border,
                         paddingBottom: Math.max(insets.bottom, 16) + 8,
-                        backgroundColor: theme.background
+                        backgroundColor: theme.background,
+                        opacity: isChatEnabled ? 1 : 0.5
                     }
                 ]}>
                     <TextInput
@@ -117,16 +169,17 @@ export default function ChatScreen() {
                             color: theme.text,
                             borderColor: theme.border
                         }]}
-                        placeholder="Type a message..."
+                        placeholder={isChatEnabled ? "Type a message..." : "Please choose an option first"}
                         placeholderTextColor={theme.textMuted}
                         value={inputText}
                         onChangeText={setInputText}
                         multiline
+                        editable={isChatEnabled}
                     />
                     <TouchableOpacity
                         style={[styles.sendButton, { backgroundColor: theme.primary }]}
                         onPress={handleSend}
-                        disabled={inputText.trim().length === 0}
+                        disabled={inputText.trim().length === 0 || !isChatEnabled}
                     >
                         <Icon name="send" size={20} color="#FFFFFF" />
                     </TouchableOpacity>
@@ -199,5 +252,23 @@ const styles = StyleSheet.create({
         borderRadius: 22,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    quickReplyContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        paddingHorizontal: 16,
+        paddingBottom: 8,
+        justifyContent: 'center',
+    },
+    quickReplyButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        borderWidth: 1,
+        margin: 4,
+    },
+    quickReplyText: {
+        fontSize: 14,
+        fontWeight: '500',
     },
 });
