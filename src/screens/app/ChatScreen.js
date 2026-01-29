@@ -12,6 +12,7 @@ import {
 import { useTheme } from '../../theme/ThemeContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
+import PropTypes from 'prop-types';
 
 export default function ChatScreen() {
     const { theme } = useTheme();
@@ -83,8 +84,18 @@ export default function ChatScreen() {
         setInputText('');
     };
 
-    const renderMessage = ({ item }) => {
+    const MessageItem = ({ item, theme }) => {
+        const [isExpanded, setIsExpanded] = useState(false);
+        const [showMoreNeeded, setShowMoreNeeded] = useState(false);
         const isUser = item.sender === 'You';
+
+        const onTextLayout = (e) => {
+            // If the text would take more than 1 line, show the toggle
+            if (e.nativeEvent.lines.length > 1 && !isExpanded) {
+                setShowMoreNeeded(true);
+            }
+        };
+
         return (
             <View style={[
                 styles.messageContainer,
@@ -94,19 +105,41 @@ export default function ChatScreen() {
                     styles.messageBubble,
                     isUser ?
                         { backgroundColor: theme.primary, borderBottomRightRadius: 2 } :
-                        { backgroundColor: theme.surface, borderBottomLeftRadius: 2 }
+                        { backgroundColor: theme.surface, borderBottomLeftRadius: 2 },
+                    // If it needs truncation at any point, keep it full width of container
+                    (showMoreNeeded || isExpanded) && { width: '100%' }
                 ]}>
                     {!isUser && (
                         <Text style={[styles.senderName, { color: theme.primary }]}>
                             {item.sender}
                         </Text>
                     )}
-                    <Text style={[
-                        styles.messageText,
-                        { color: isUser ? '#FFFFFF' : theme.text }
-                    ]}>
+                    <Text
+                        style={[
+                            styles.messageText,
+                            { color: isUser ? '#FFFFFF' : theme.text }
+                        ]}
+                        numberOfLines={isExpanded ? undefined : 1}
+                        ellipsizeMode="tail"
+                        onTextLayout={onTextLayout}
+                    >
                         {item.text}
                     </Text>
+
+                    {showMoreNeeded && (
+                        <TouchableOpacity
+                            onPress={() => setIsExpanded(!isExpanded)}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        >
+                            <Text style={[
+                                styles.showMoreText,
+                                { color: isUser ? 'rgba(255,255,255,0.9)' : theme.primary }
+                            ]}>
+                                {isExpanded ? 'Show Less' : 'Show More'}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+
                     <Text style={[
                         styles.timestamp,
                         { color: isUser ? 'rgba(255,255,255,0.7)' : theme.textMuted }
@@ -117,6 +150,27 @@ export default function ChatScreen() {
             </View>
         );
     };
+
+    MessageItem.propTypes = {
+        item: PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            text: PropTypes.string.isRequired,
+            sender: PropTypes.string.isRequired,
+            timestamp: PropTypes.string.isRequired,
+        }).isRequired,
+        theme: PropTypes.shape({
+            primary: PropTypes.string.isRequired,
+            surface: PropTypes.string.isRequired,
+            background: PropTypes.string.isRequired,
+            text: PropTypes.string.isRequired,
+            textMuted: PropTypes.string.isRequired,
+            border: PropTypes.string.isRequired,
+        }).isRequired,
+    };
+
+    const renderMessage = ({ item }) => (
+        <MessageItem item={item} theme={theme} />
+    );
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -229,6 +283,12 @@ const styles = StyleSheet.create({
         fontSize: 10,
         alignSelf: 'flex-end',
         marginTop: 4,
+    },
+    showMoreText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        marginTop: 4,
+        textDecorationLine: 'underline',
     },
     inputContainer: {
         flexDirection: 'row',
