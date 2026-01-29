@@ -90,8 +90,8 @@ export default function ChatScreen() {
         const isUser = item.sender === 'You';
 
         const onTextLayout = (e) => {
-            // If the text would take more than 1 line, show the toggle
-            if (e.nativeEvent.lines.length > 1 && !isExpanded) {
+            // Only trigger truncation logic for user messages
+            if (isUser && e.nativeEvent.lines.length > 1 && !isExpanded) {
                 setShowMoreNeeded(true);
             }
         };
@@ -106,8 +106,8 @@ export default function ChatScreen() {
                     isUser ?
                         { backgroundColor: theme.primary, borderBottomRightRadius: 2 } :
                         { backgroundColor: theme.surface, borderBottomLeftRadius: 2 },
-                    // If it needs truncation at any point, keep it full width of container
-                    (showMoreNeeded || isExpanded) && { width: '100%' }
+                    // Only force full width for user messages that need expansion
+                    isUser && (showMoreNeeded || isExpanded) && { width: '100%' }
                 ]}>
                     {!isUser && (
                         <Text style={[styles.senderName, { color: theme.primary }]}>
@@ -119,14 +119,15 @@ export default function ChatScreen() {
                             styles.messageText,
                             { color: isUser ? '#FFFFFF' : theme.text }
                         ]}
-                        numberOfLines={isExpanded ? undefined : 1}
+                        // Truncate only if it is a user message
+                        numberOfLines={isUser && !isExpanded ? 1 : undefined}
                         ellipsizeMode="tail"
                         onTextLayout={onTextLayout}
                     >
                         {item.text}
                     </Text>
 
-                    {showMoreNeeded && (
+                    {isUser && showMoreNeeded && (
                         <TouchableOpacity
                             onPress={() => setIsExpanded(!isExpanded)}
                             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
