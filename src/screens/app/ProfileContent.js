@@ -57,7 +57,10 @@ export default function ProfileContent({ userData, onLogout, navigation }) {
 
             <TouchableOpacity
                 style={[styles.logoutButton, { backgroundColor: theme.surface, borderColor: theme.notification }]}
-                onPress={onLogout}
+                onPress={() => {
+                    console.log('Sign Out button pressed');
+                    onLogout();
+                }}
             >
                 <MaterialCommunityIcons name="logout" size={24} color={theme.notification} />
                 <Text style={[styles.logoutText, { color: theme.notification }]}>Sign Out</Text>

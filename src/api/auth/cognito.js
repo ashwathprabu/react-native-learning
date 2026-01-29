@@ -5,6 +5,7 @@ import {
   getCurrentUser as amplifyGetCurrentUser,
   signOut as amplifySignOut,
   fetchUserAttributes as amplifyFetchUserAttributes,
+  updateUserAttribute as amplifyUpdateUserAttribute,
 } from 'aws-amplify/auth';
 
 export async function signUp({ firstName, lastName, email, phone, password }) {
@@ -79,6 +80,23 @@ export async function fetchUserDetails() {
     console.log('user', JSON.stringify(user, null, 2));
     return { success: true, data: user };
   } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function updateUserOnboardedStatus() {
+  try {
+    console.log('Updating onboarded status...');
+    await amplifyUpdateUserAttribute({
+      userAttribute: {
+        attributeKey: 'custom:is_onboarded',
+        value: 'true',
+      },
+    });
+    console.log('Onboarded status updated successfully');
+    return { success: true };
+  } catch (error) {
+    console.log('Update Status Error:', error);
     return { success: false, error: error.message };
   }
 }

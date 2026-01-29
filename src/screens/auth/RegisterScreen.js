@@ -11,6 +11,7 @@ import {
 import PropTypes from 'prop-types';
 
 import { signUp } from '../../api/auth/cognito';
+import PasswordInput from '../../components/PasswordInput';
 
 const styles = StyleSheet.create({
     background: {
@@ -183,20 +184,16 @@ export default function RegisterScreen({ navigation }) {
                     onChangeText={setEmail}
                 />
 
-                <TextInput
+                <PasswordInput
                     placeholder="Password"
                     placeholderTextColor="#aaa"
-                    secureTextEntry
-                    style={styles.input}
                     value={password}
                     onChangeText={setPassword}
                 />
 
-                <TextInput
+                <PasswordInput
                     placeholder="Confirm Password"
                     placeholderTextColor="#aaa"
-                    secureTextEntry
-                    style={styles.input}
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
                 />

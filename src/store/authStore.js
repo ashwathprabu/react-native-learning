@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { fetchUserDetails } from '../api/auth/cognito';
+import { fetchUserDetails, signOut as cognitoSignOut } from '../api/auth/cognito';
 
 const AuthContext = createContext();
 
@@ -42,9 +42,20 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('token');
-    setToken(null);
-    setUserData(null);
+    try {
+      console.log('Logging out...');
+      await cognitoSignOut();
+      await AsyncStorage.removeItem('token');
+      setToken(null);
+      setUserData(null);
+      console.log('Logout successful');
+    } catch (e) {
+      console.error('Logout failed', e);
+      // Still clear local state even if Cognito sign out fails
+      await AsyncStorage.removeItem('token');
+      setToken(null);
+      setUserData(null);
+    }
   };
 
   return (

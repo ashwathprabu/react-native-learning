@@ -11,9 +11,9 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import PropTypes from 'prop-types';
-import { signIn, getCurrentUser, signOut, fetcUserDetails } from '../../api/auth/cognito';
+import { signIn, getCurrentUser, signOut, fetchUserDetails } from '../../api/auth/cognito';
 import { useAuth } from '../../store/authStore';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import PasswordInput from '../../components/PasswordInput';
 
 const styles = StyleSheet.create({
     background: {
@@ -98,32 +98,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 15,
     },
-    passwordContainer: {
-        position: 'relative',          // allow absolute positioning
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        borderRadius: 8,
-    },
-    passwordInput: {
-        width: '100%',                 // full width
-        backgroundColor: 'rgba(255,255,255,0.1)',
-        color: '#fff',
-        padding: 13,
-        paddingRight: 45,              // space for the eye icon
-        borderRadius: 8,
-    },
-    eyeIcon: {
-        position: 'absolute',
-        right: 12,
-        top: '50%',
-        transform: [{ translateY: -11 }], // vertically center icon
-    },
 });
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
     const { login } = useAuth();
 
 
@@ -143,32 +123,56 @@ export default function LoginScreen({ navigation }) {
             Alert.alert('Error', 'Please enter both email and password');
             return;
         }
-        await signOut();
-        setLoading(true);
 
-        const response = await signIn({ email, password });
-        setLoading(false);
+        try {
+            console.log('Login attempt started for:', email);
+            await signOut();
+            setLoading(true);
 
-        if (response.success) {
-            console.log('response', response);
-            // Check if user needs to confirm their account
-            if (!response.data.isSignedIn && response.data.nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
-                navigation.navigate('OtpVerification', { email });
-                return;
-            }
+            const response = await signIn({ email, password });
+            console.log('SignIn Response:', JSON.stringify(response, null, 2));
 
-            if (response.data.isSignedIn && response.data.nextStep?.signInStep === 'DONE') {
-                const { data } = await fetcUserDetails()
-                if (data['custom:is_onboarded'] === 'false') {
-                    navigation.navigate('Onboarding');
+            if (response.success) {
+                // Check if user needs to confirm their account
+                if (!response.data.isSignedIn && response.data.nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
+                    console.log('Navigation to OtpVerification');
+                    setLoading(false);
+                    navigation.navigate('OtpVerification', { email });
                     return;
                 }
-                login('authorized');
-                return;
+
+                if (response.data.isSignedIn && response.data.nextStep?.signInStep === 'DONE') {
+                    console.log('SignIn successful, fetching user details...');
+                    const userDetails = await fetchUserDetails();
+                    console.log('User Details Response:', JSON.stringify(userDetails, null, 2));
+
+                    if (userDetails.success) {
+                        const { data } = userDetails;
+                        if (data['custom:is_onboarded'] === 'false') {
+                            console.log('Navigation to Onboarding');
+                            setLoading(false);
+                            navigation.navigate('Onboarding');
+                            return;
+                        }
+                        console.log('User authenticated, updating auth store');
+                        login('authorized');
+                    } else {
+                        console.error('Failed to fetch user details:', userDetails.error);
+                        Alert.alert('Login Error', 'Could not fetch user profile details.');
+                    }
+                } else {
+                    console.log('Login step not handled:', response.data.nextStep?.signInStep);
+                    Alert.alert('Login Failed', 'Unexpected login status.');
+                }
+            } else {
+                console.log('SignIn Failed:', response.error);
+                Alert.alert('Login Failed', response.error);
             }
-            Alert.alert('Login Failed', 'Invalid credentials');
-        } else {
-            Alert.alert('Login Failed', response.error);
+        } catch (error) {
+            console.error('Login process error:', error);
+            Alert.alert('Error', 'An unexpected error occurred during login. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -193,27 +197,11 @@ export default function LoginScreen({ navigation }) {
                     autoCapitalize="none"
                     keyboardType="email-address"
                 />
-                <View style={styles.passwordContainer}>
-                    <TextInput
-                        placeholder="Password"
-                        placeholderTextColor="#ccc"
-                        secureTextEntry={!showPassword}
-                        style={styles.passwordInput}
-                        value={password}
-                        onChangeText={setPassword}
-                    />
-
-                    <TouchableOpacity
-                        onPress={() => setShowPassword(prev => !prev)}
-                        style={styles.eyeIcon}
-                    >
-                        <Icon
-                            name={showPassword ? 'eye-off' : 'eye'}
-                            size={22}
-                            color="#ccc"
-                        />
-                    </TouchableOpacity>
-                </View>
+                <PasswordInput
+                    placeholder="Password"
+                    value={password}
+                    onChangeText={setPassword}
+                />
                 <TouchableOpacity
                     style={styles.button}
                     onPress={handleLogin}

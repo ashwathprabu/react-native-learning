@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -6,12 +6,38 @@ import {
     StyleSheet,
     TouchableOpacity,
     StatusBar,
+    ActivityIndicator,
+    Alert,
 } from 'react-native';
 // import LinearGradient from 'react-native-linear-gradient';
 import { useAuth } from '../../store/authStore';
+import { updateUserOnboardedStatus } from '../../api/auth/cognito';
 
 const OnboardingScreen = () => {
     const { login } = useAuth();
+    const [loading, setLoading] = useState(false);
+
+    const handleGetStarted = async () => {
+        setLoading(true);
+        try {
+            const response = await updateUserOnboardedStatus();
+            if (response.success) {
+                login('authorized');
+            } else {
+                console.error('Failed to update onboarding status:', response.error);
+                Alert.alert(
+                    'Update Warning',
+                    'We couldn\'t update your onboarding status on the server, but you can still proceed. Error: ' + response.error,
+                    [{ text: 'Proceed', onPress: () => login('authorized') }]
+                );
+            }
+        } catch (error) {
+            console.error('Error in handleGetStarted:', error);
+            login('authorized');
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
         <View style={styles.container}>
             <StatusBar translucent backgroundColor="transparent" />
@@ -38,9 +64,14 @@ const OnboardingScreen = () => {
 
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={() => login('authorized')}
+                        onPress={handleGetStarted}
+                        disabled={loading}
                     >
-                        <Text style={styles.buttonText}>GET STARTED</Text>
+                        {loading ? (
+                            <ActivityIndicator color="#fff" />
+                        ) : (
+                            <Text style={styles.buttonText}>GET STARTED</Text>
+                        )}
                     </TouchableOpacity>
                     {/* </LinearGradient> */}
                 </View>
